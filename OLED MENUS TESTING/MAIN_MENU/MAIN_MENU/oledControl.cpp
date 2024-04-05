@@ -6,7 +6,11 @@
 MicroOLED oled(PIN_RESET, DC_JUMPER); //Example I2C declaration
 
 // Holds value for current menu option
-int menu = 1;
+volatile int currentMenu = 1;
+volatile int mainMenu = 1;
+volatile int freeRunMenu = 1;
+volatile int startRunMenu = 1;
+volatile int settingsMenu = 1;
 
 // Initializes OLED and wipes screen
 void startOLED() {
@@ -17,16 +21,16 @@ void startOLED() {
 
 // Updates main menu
 void updateMainMenu() {
-  switch (menu) {
+  switch (mainMenu) {
     case 0:
-      menu = 1;
+      mainMenu = 1;
       break;
     case 1:
       oled.clear(PAGE);
       oled.setCursor(0,0);
       oled.print("MAIN MENU");
       oled.setCursor(0,10);
-      oled.print(">Freestyle");
+      oled.print(">Freerun");
       oled.setCursor(0,20);
       oled.print(" Start run");
       oled.setCursor(0,30);
@@ -38,7 +42,7 @@ void updateMainMenu() {
       oled.setCursor(0,0);
       oled.print("MAIN MENU");
       oled.setCursor(0,10);
-      oled.print(" Freestyle");
+      oled.print(" Freerun");
       oled.setCursor(0,20);
       oled.print(">Start run");
       oled.setCursor(0,30);
@@ -50,7 +54,7 @@ void updateMainMenu() {
       oled.setCursor(0,0);
       oled.print("MAIN MENU");
       oled.setCursor(0,10);
-      oled.print(" Freestyle");
+      oled.print(" Freerun");
       oled.setCursor(0,20);
       oled.print(" Start run");
       oled.setCursor(0,30);
@@ -70,12 +74,12 @@ void updateMainMenu() {
       oled.display();
       break;
     case 5:
-      menu = 1;
+      mainMenu = 1;
       oled.clear(PAGE);
       oled.setCursor(0,0);
       oled.print("MAIN MENU");
       oled.setCursor(0,10);
-      oled.print(">Freestyle");
+      oled.print(">Freerun");
       oled.setCursor(0,20);
       oled.print(" Start run");
       oled.setCursor(0,30);
@@ -84,3 +88,124 @@ void updateMainMenu() {
       break;
   }
 }
+
+// Updates free run menu
+void updateFreeRunMenu() {
+  switch(freeRunMenu) {
+    case 0:
+      freeRunMenu = 1;
+      break;
+    case 1:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("FREERUN");
+      oled.setCursor(0,10);
+      oled.print(">Start");
+      oled.setCursor(0,20);
+      oled.print(" Return");
+      oled.display();
+      break;
+    case 2:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("FREERUN");
+      oled.setCursor(0,10);
+      oled.print(" Start");
+      oled.setCursor(0,20);
+      oled.print(">Return");
+      oled.display();
+      break;
+    case 3:
+      freeRunMenu = 1;
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("FREERUN");
+      oled.setCursor(0,10);
+      oled.print(">Start");
+      oled.setCursor(0,20);
+      oled.print(" Return");
+      oled.display();
+      break;
+  }
+}
+
+// Updates start run menu
+void updateStartRunMenu() {
+  switch(startRunMenu) {
+    case 0:
+      startRunMenu = 1;
+      break;
+    case 1:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("START RUN");
+      oled.setCursor(0,10);
+      oled.print(">Start Run");
+      oled.setCursor(0,20);
+      oled.print(" Return");
+      oled.display();
+      break;
+    case 2:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("START RUN");
+      oled.setCursor(0,10);
+      oled.print(" Start Run");
+      oled.setCursor(0,20);
+      oled.print(">Return");
+      oled.display();
+      break;
+    case 3:
+      startRunMenu = 1;
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("START RUN");
+      oled.setCursor(0,10);
+      oled.print(">Start Run");
+      oled.setCursor(0,20);
+      oled.print(" Return");
+      oled.display();
+      break;
+  }
+}
+
+// Updates settings menu
+void updateSettingsMenu() {
+  switch(settingsMenu) {
+    case 0:
+      settingsMenu = 1;
+      break;
+    case 1:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("SETTINGS");
+      oled.setCursor(0,10);
+      oled.print(">GPS");
+      oled.setCursor(0,20);
+      oled.print(" Units");
+      oled.display();
+      break;
+    case 2:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("FREERUN");
+      oled.setCursor(0,10);
+      oled.print(" GPS");
+      oled.setCursor(0,20);
+      oled.print(">Units");
+      oled.display();
+      break;
+    case 3:
+      settingsMenu = 1;
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("FREERUN");
+      oled.setCursor(0,10);
+      oled.print(">GPS");
+      oled.setCursor(0,20);
+      oled.print(" Units");
+      oled.display();
+      break;
+  }
+}
+
