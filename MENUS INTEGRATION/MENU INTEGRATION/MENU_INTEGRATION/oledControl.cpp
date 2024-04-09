@@ -236,6 +236,15 @@ void showFreerunScreen() {
   oled.display();
 }
 
+void showRunTypeMenu() {
+  oled.clear(PAGE);
+  oled.setCursor(0,0);
+  oled.print("Start run?");
+  oled.setCursor(0,10);
+  oled.print("[Y], [N] ");
+  oled.display();
+}
+
 void OLED_UpdateSpeed(double speed) {
   // Update OLED speed
     //oled.clear(PAGE);

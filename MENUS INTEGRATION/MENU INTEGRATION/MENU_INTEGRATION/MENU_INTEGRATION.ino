@@ -70,6 +70,7 @@ void loop() {
       }
     }
 
+    /*FREERUN MENU & FREERUN CODE*/
     else if(currentMenu == 2) { // currentMenu = 2 = freeRunMenu
       if(freeRunMenu == 1) {
         // Show freerun screen
@@ -88,10 +89,16 @@ void loop() {
         updateMainMenu(); // Return to main menu
       }
     }
-
+    /*START RUN CODE & START RUN CODE*/
     else if(currentMenu == 3) { // currentMenu = 3 = start run menu
       if(startRunMenu == 1) {
-        /*WHILE: START-RUN CODE */
+        // Show start run screen
+        showRunTypeMenu();
+        // Run start run code
+        while(!moveDownFlag) {
+          /*Check bluetooth er initialiseret*/
+          /*Start run skærm + live timer*/
+        }
       }
       else if(startRunMenu == 2) {
         currentMenu = 1;

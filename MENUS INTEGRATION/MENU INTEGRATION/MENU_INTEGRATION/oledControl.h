@@ -28,4 +28,7 @@ void OLED_UpdateSpeed(double speed);
 // Freerun static screen
 void showFreerunScreen();
 
+// Start run static screen
+void showRunTypeMenu();
+
 #endif /* OLED_CONTROL_H */
