@@ -33,6 +33,10 @@ void loop() {
       startRunMenu++; // Increment startrunmenu variable
       updateStartRunMenu(); 
     }
+    else if(currentMenu == 4) { // Start run menu
+      settingsMenu++; // Increment startrunmenu variable
+      updateSettingsMenu(); 
+    }
     moveDownFlag = false; // Reset movedown flag  
   }
 
@@ -48,6 +52,7 @@ void loop() {
       }
       else if(mainMenu == 3){ // Show settings menu
         currentMenu = 4; // Current menu is now settings screen
+        updateSettingsMenu();
       }
       else if(mainMenu == 4){ // Show menuItem menu
         currentMenu = 5; // Current menu is now menuItem screen
@@ -75,6 +80,18 @@ void loop() {
         updateMainMenu(); // Return to main menu
       }
     }
+
+    else if(currentMenu == 4) { // currentMenu = 4 = settings menu
+      if(settingsMenu == 1) {
+        /*WHILE: SETTINGS-MENU CODE */
+      }
+      else if(settingsMenu == 3) {
+        currentMenu = 1;
+        settingsMenu = 1;
+        updateMainMenu(); // Return to main menu
+      }
+    }
+
     selectOptionFlag = false; // Reset select flag
   }
 }

@@ -183,27 +183,45 @@ void updateSettingsMenu() {
       oled.print(">GPS");
       oled.setCursor(0,20);
       oled.print(" Units");
+      oled.setCursor(0,30);
+      oled.print(" Return");
       oled.display();
       break;
     case 2:
       oled.clear(PAGE);
       oled.setCursor(0,0);
-      oled.print("FREERUN");
+      oled.print("SETTINGS");
       oled.setCursor(0,10);
       oled.print(" GPS");
       oled.setCursor(0,20);
       oled.print(">Units");
+      oled.setCursor(0,30);
+      oled.print(" Return");
       oled.display();
       break;
     case 3:
+      oled.clear(PAGE);
+      oled.setCursor(0,0);
+      oled.print("SETTINGS");
+      oled.setCursor(0,10);
+      oled.print(" GPS");
+      oled.setCursor(0,20);
+      oled.print(" Units");
+      oled.setCursor(0,30);
+      oled.print(">Return");
+      oled.display();
+      break;
+    case 4:
       settingsMenu = 1;
       oled.clear(PAGE);
       oled.setCursor(0,0);
-      oled.print("FREERUN");
+      oled.print("SETTINGS");
       oled.setCursor(0,10);
       oled.print(">GPS");
       oled.setCursor(0,20);
       oled.print(" Units");
+      oled.setCursor(0,30);
+      oled.print(" Return");
       oled.display();
       break;
   }
