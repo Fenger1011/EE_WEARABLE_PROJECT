@@ -75,7 +75,7 @@ void loop() {
         // Show freerun screen
         showFreerunScreen();
         // Run get ground speed code
-        while(1) {
+        while(!moveDownFlag) {
           if (newSpeedAvailable()) {
           double velocity_kmh = getSpeed(); // Get current speed in kmh
           OLED_UpdateSpeed(velocity_kmh); // Update OLED screen with current velocity
