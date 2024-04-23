@@ -1,24 +1,53 @@
 #include <Wire.h>
+#include <Arduino.h>
 #include "oledControl.h"
 #include "ISR.h"
 #include "u-BloxGNSS.h"
 #include "ctrlTimer.h"
+#include "Adafruit_BLE.h"
+#include "Adafruit_BluefruitLE_UART.h"
+#include "BluefruitConfig.h"
+
+#define FACTORYRESET_ENABLE         0
+#define MINIMUM_FIRMWARE_VERSION    "0.6.6"
+#define MODE_LED_BEHAVIOUR          "HWUART"
+
+// Create bluefruit hardware UART object
+Adafruit_BluefruitLE_UART ble(Serial1, BLUEFRUIT_UART_MODE_PIN); // Serial1 er UART på MCU'en
+
+// A small helper function (HVAD GØR DEN?!!?)
+void error(const __FlashStringHelper*err) {
+  Serial.println(err);
+  while (1);
+}
+
 
 void setup() {
-  Serial.begin(9600);
+  Serial1.begin(115200); // Init UART på SAMD51
+  Serial.begin(115200);
+
   pinMode(6, INPUT_PULLUP); // MoveDown button
   pinMode(4, INPUT_PULLUP); // SelectOption button
   attachInterrupt(digitalPinToInterrupt(6), moveDown, FALLING);
   attachInterrupt(digitalPinToInterrupt(4), selectOption, FALLING);
 
-  // Initialize I2C
+  /* Initialize I2C */
   Wire.begin();
 
-  // Start and init oled
+  /* Start and init oled */
   startOLED();
 
-  // Initialize GNSS module with navigation frequency 5Hz
-  init_GNSS(5); 
+  /* Initialize GNSS module with navigation frequency 5Hz */
+  init_GNSS(5);
+
+  /* Initialise the module */
+  ble.begin(VERBOSE_MODE);
+
+  /* Disable command echo from Bluefruit */
+  ble.echo(false);
+
+  /* Set to low */
+  ble.setMode(BLUEFRUIT_MODE_DATA);
 
   // Setup the timer (Timer 3)
   setupTimer();                                   // Setup the timer
@@ -75,6 +104,10 @@ void loop() {
       if(freeRunMenu == 1) {
         // Show freerun screen
         showFreerunScreen();
+
+        // Check for user input
+        char n, inputs[BUFSIZE+1];
+
         // Run get ground speed code
         while(!moveDownFlag) {
           if (newSpeedAvailable()) {
@@ -92,12 +125,29 @@ void loop() {
     /*START RUN CODE & START RUN CODE*/
     else if(currentMenu == 3) { // currentMenu = 3 = start run menu
       if(startRunMenu == 1) {
+        
         // Show start run screen
         showRunTypeMenu();
+
+        Serial.println("STARTING BLUETOOTH MODE");
+
         // Run start run code
         while(!moveDownFlag) {
-          /*Check bluetooth er initialiseret*/
-          /*Start run skærm + live timer*/
+           // Check for user input
+          char n, inputs[BUFSIZE+1];
+          
+          // Bluetooth transmit code
+          if (Serial.available())
+          {
+            n = Serial.readBytes(inputs, BUFSIZE);
+            inputs[n] = 0;
+            // Send characters to Bluefruit
+            Serial.print("Sending: ");
+            Serial.println(inputs);
+
+            // Send input data to host via Bluefruit
+            ble.print(inputs);
+          }
         }
       }
       else if(startRunMenu == 2) {
