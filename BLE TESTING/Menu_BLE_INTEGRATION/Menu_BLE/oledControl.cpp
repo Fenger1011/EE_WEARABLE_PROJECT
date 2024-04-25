@@ -236,10 +236,10 @@ void showFreerunScreen() {
   oled.display();
 }
 
-void showRunTypeMenu() {
+void showLogModeScreen() {
   oled.clear(PAGE);
   oled.setCursor(0,0);
-  oled.print("Start run?");
+  oled.print("Start log?");
   oled.setCursor(0,10);
   oled.print("[Y], [N] ");
   oled.display();

@@ -8,26 +8,27 @@
 #include "Adafruit_BluefruitLE_UART.h"
 #include "BluefruitConfig.h"
 
-#define FACTORYRESET_ENABLE         0
-#define MINIMUM_FIRMWARE_VERSION    "0.6.6"
-#define MODE_LED_BEHAVIOUR          "HWUART"
+#define FACTORYRESET_ENABLE 0
+#define MINIMUM_FIRMWARE_VERSION "0.6.6"
+#define MODE_LED_BEHAVIOUR "HWUART"
 
 // Create bluefruit hardware UART object
-Adafruit_BluefruitLE_UART ble(Serial1, BLUEFRUIT_UART_MODE_PIN); // Serial1 er UART på MCU'en
+Adafruit_BluefruitLE_UART ble(Serial1, BLUEFRUIT_UART_MODE_PIN);  // Serial1 er UART på MCU'en
 
 // A small helper function (HVAD GØR DEN?!!?)
-void error(const __FlashStringHelper*err) {
+void error(const __FlashStringHelper* err) {
   Serial.println(err);
-  while (1);
+  while (1)
+    ;
 }
 
 
 void setup() {
-  Serial1.begin(115200); // Init UART på SAMD51
+  Serial1.begin(115200);  // Init UART på SAMD51
   Serial.begin(115200);
 
-  pinMode(6, INPUT_PULLUP); // MoveDown button
-  pinMode(4, INPUT_PULLUP); // SelectOption button
+  pinMode(6, INPUT_PULLUP);  // MoveDown button
+  pinMode(4, INPUT_PULLUP);  // SelectOption button
   attachInterrupt(digitalPinToInterrupt(6), moveDown, FALLING);
   attachInterrupt(digitalPinToInterrupt(4), selectOption, FALLING);
 
@@ -50,124 +51,104 @@ void setup() {
   ble.setMode(BLUEFRUIT_MODE_DATA);
 
   // Setup the timer (Timer 3)
-  setupTimer();                                   // Setup the timer
-  TC3->COUNT16.CC[0].reg = 0x5B8D;                // Set timer frequency to 5Hz
-  while (TC3->COUNT16.SYNCBUSY.bit.CC0);          // Wait for clock domain sync
-  startTimer();                                   // Start the timer
-  
+  setupTimer();                     // Setup the timer
+  TC3->COUNT16.CC[0].reg = 0x5B8D;  // Set timer frequency to 5Hz
+  while (TC3->COUNT16.SYNCBUSY.bit.CC0)
+    ;            // Wait for clock domain sync
+  startTimer();  // Start the timer
+
   // Show main menu by default
   updateMainMenu();
 }
 
 void loop() {
-  if(moveDownFlag) { // User presses down button
-    if(currentMenu == 1) { // Main menu
-      mainMenu++; // Increment menu variable
-      updateMainMenu(); // Update main menu
-    }
-    else if(currentMenu == 2) { // FreeRun Menu
-      freeRunMenu++; // Increment freerunmenu variable
+  if (moveDownFlag) {               // User presses down button
+    if (currentMenu == 1) {         // Main menu
+      mainMenu++;                   // Increment menu variable
+      updateMainMenu();             // Update main menu
+    } else if (currentMenu == 2) {  // FreeRun Menu
+      freeRunMenu++;                // Increment freerunmenu variable
       updateFreeRunMenu();
+    } else if (currentMenu == 3) {  // Start run menu
+      startRunMenu++;               // Increment startrunmenu variable
+      updateStartRunMenu();
+    } else if (currentMenu == 4) {  // Start run menu
+      settingsMenu++;               // Increment startrunmenu variable
+      updateSettingsMenu();
     }
-    else if(currentMenu == 3) { // Start run menu
-      startRunMenu++; // Increment startrunmenu variable
-      updateStartRunMenu(); 
-    }
-    else if(currentMenu == 4) { // Start run menu
-      settingsMenu++; // Increment startrunmenu variable
-      updateSettingsMenu(); 
-    }
-    moveDownFlag = false; // Reset movedown flag  
+    moveDownFlag = false;  // Reset movedown flag
   }
 
-  if(selectOptionFlag) { // User presses select button
-    if(currentMenu == 1) { // currentMenu = 1 = mainMenu
-      if(mainMenu == 1) { // mainmenu = 1 = freerun mode
-        currentMenu = 2; // Current menu is now freerun screen
+  if (selectOptionFlag) {    // User presses select button
+    if (currentMenu == 1) {  // currentMenu = 1 = mainMenu
+      if (mainMenu == 1) {   // mainmenu = 1 = freerun mode
+        currentMenu = 2;     // Current menu is now freerun screen
         updateFreeRunMenu();
-      }
-      else if(mainMenu == 2) { // mainmenu = 2 = start run mode 
-        currentMenu = 3; // current menu is now start run screen
+      } else if (mainMenu == 2) {  // mainmenu = 2 = start run mode
+        currentMenu = 3;           // current menu is now start run screen
         updateStartRunMenu();
-      }
-      else if(mainMenu == 3){ // Show settings menu
-        currentMenu = 4; // Current menu is now settings screen
+      } else if (mainMenu == 3) {  // Show settings menu
+        currentMenu = 4;           // Current menu is now settings screen
         updateSettingsMenu();
-      }
-      else if(mainMenu == 4){ // Show menuItem menu
-        currentMenu = 5; // Current menu is now menuItem screen
+      } else if (mainMenu == 4) {  // Show menuItem menu
+        currentMenu = 5;           // Current menu is now menuItem screen
       }
     }
 
     /*FREERUN MENU & FREERUN CODE*/
-    else if(currentMenu == 2) { // currentMenu = 2 = freeRunMenu
-      if(freeRunMenu == 1) {
+    else if (currentMenu == 2) {  // currentMenu = 2 = freeRunMenu
+      if (freeRunMenu == 1) {
         // Show freerun screen
         showFreerunScreen();
 
-        // Check for user input
-        char n, inputs[BUFSIZE+1];
-
         // Run get ground speed code
-        while(!moveDownFlag) {
+        while (!moveDownFlag) {
           if (newSpeedAvailable()) {
-          double velocity_kmh = getSpeed(); // Get current speed in kmh
-          OLED_UpdateSpeed(velocity_kmh); // Update OLED screen with current velocity
+            double velocity_kmh = getSpeed();  // Get current speed in kmh
+            OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
           }
         }
-      }
-      else if(freeRunMenu == 2) { // return to main menu
+      } else if (freeRunMenu == 2) {  // return to main menu
         currentMenu = 1;
         freeRunMenu = 1;
-        updateMainMenu(); // Return to main menu
+        updateMainMenu();  // Return to main menu
       }
     }
     /*START RUN CODE & START RUN CODE*/
-    else if(currentMenu == 3) { // currentMenu = 3 = start run menu
-      if(startRunMenu == 1) {
-        
-        // Show start run screen
-        showRunTypeMenu();
+    else if (currentMenu == 3) {  // currentMenu = 3 = start run menu
+      if (startRunMenu == 1) {
+
+        // Show start log mode screen
+        showLogModeScreen();  // Skal ændres til run mode screen
 
         Serial.println("STARTING BLUETOOTH MODE");
 
         // Run start run code
-        while(!moveDownFlag) {
-           // Check for user input
-          char n, inputs[BUFSIZE+1];
-          
-          // Bluetooth transmit code
-          if (Serial.available())
-          {
-            n = Serial.readBytes(inputs, BUFSIZE);
-            inputs[n] = 0;
-            // Send characters to Bluefruit
-            Serial.print("Sending: ");
-            Serial.println(inputs);
-
-            // Send input data to host via Bluefruit
-            ble.print(inputs);
+        while (!moveDownFlag) {
+          if (newSpeedAvailable()) {
+              double velocity_kmh = getSpeed();  // Get current speed in kmh
+              OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
+              ble.print(velocity_kmh);           // Send velocity over BT
+              ble.print(";");
           }
         }
-      }
-      else if(startRunMenu == 2) {
+      } else if (startRunMenu == 2) {
         currentMenu = 1;
         startRunMenu = 1;
-        updateMainMenu(); // Return to main menu
+        updateMainMenu();  // Return to main menu
       }
     }
 
-    else if(currentMenu == 4) { // currentMenu = 4 = settings menu
-      if(settingsMenu == 1) {
+    else if (currentMenu == 4) {  // currentMenu = 4 = settings menu
+      if (settingsMenu == 1) {
         /*WHILE: SETTINGS-MENU CODE */
-      }
-      else if(settingsMenu == 3) {
+      } else if (settingsMenu == 3) {
         currentMenu = 1;
         settingsMenu = 1;
-        updateMainMenu(); // Return to main menu
+        updateMainMenu();  // Return to main menu
       }
     }
 
-    selectOptionFlag = false; // Reset select flag
+    selectOptionFlag = false;  // Reset select flag
   }
 }
