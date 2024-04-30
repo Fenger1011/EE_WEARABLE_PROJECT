@@ -26,9 +26,9 @@ void setup() {
   Serial1.begin(115200);  // Init UART på SAMD51
   Serial.begin(115200);   // Init serial
 
-  pinMode(6, INPUT_PULLUP);  // MoveDown button
+  pinMode(13, INPUT_PULLUP);  // MoveDown button
   pinMode(4, INPUT_PULLUP);  // SelectOption button
-  attachInterrupt(digitalPinToInterrupt(6), moveDown, FALLING);
+  attachInterrupt(digitalPinToInterrupt(13), moveDown, FALLING);
   attachInterrupt(digitalPinToInterrupt(4), selectOption, FALLING);
 
   /* Initialize I2C */
@@ -52,8 +52,7 @@ void setup() {
   // Setup the timer (Timer 3)
   setupTimer();                     // Setup the timer
   TC3->COUNT16.CC[0].reg = 0x5B8D;  // Set timer frequency to 5Hz
-  while (TC3->COUNT16.SYNCBUSY.bit.CC0)
-    ;            // Wait for clock domain sync
+  while (TC3->COUNT16.SYNCBUSY.bit.CC0);            // Wait for clock domain sync
   startTimer();  // Start the timer
 
   // Show main menu by default
