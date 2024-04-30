@@ -22,10 +22,9 @@ void error(const __FlashStringHelper* err) {
     ;
 }
 
-
 void setup() {
   Serial1.begin(115200);  // Init UART på SAMD51
-  Serial.begin(115200);
+  Serial.begin(115200);   // Init serial
 
   pinMode(6, INPUT_PULLUP);  // MoveDown button
   pinMode(4, INPUT_PULLUP);  // SelectOption button
@@ -62,6 +61,9 @@ void setup() {
 }
 
 void loop() {
+  // Start timer for LogModeRun loop:
+  unsigned long startTime = millis();
+
   if (moveDownFlag) {               // User presses down button
     if (currentMenu == 1) {         // Main menu
       mainMenu++;                   // Increment menu variable
@@ -95,6 +97,7 @@ void loop() {
       }
     }
 
+    
     /*FREERUN MENU & FREERUN CODE*/
     else if (currentMenu == 2) {  // currentMenu = 2 = freeRunMenu
       if (freeRunMenu == 1) {
@@ -114,21 +117,25 @@ void loop() {
         updateMainMenu();  // Return to main menu
       }
     }
+    
+    
     /*START RUN CODE & START RUN CODE*/
     else if (currentMenu == 3) {  // currentMenu = 3 = start run menu
       if (startRunMenu == 1) {
-
-        // Show start log mode screen
-        showLogModeScreen();  // Skal ændres til run mode screen
-
-        Serial.println("STARTING BLUETOOTH MODE");
+        
+        // Show run screen
+        showLogRunScreen();
 
         // Run start run code
         while (!moveDownFlag) {
           if (newSpeedAvailable()) {
               double velocity_kmh = getSpeed();  // Get current speed in kmh
+              unsigned long currentTime = (millis() - startTime); // Get current time
               OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
-              ble.print(velocity_kmh);           // Send velocity over BT
+              OLED_UpdateTime(currentTime);      // Update OLED screen with current time
+
+              // Send velocity over BT
+              ble.print(velocity_kmh);
               ble.print(";");
           }
         }

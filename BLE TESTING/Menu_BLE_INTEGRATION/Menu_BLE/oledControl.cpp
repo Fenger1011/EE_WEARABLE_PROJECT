@@ -62,18 +62,6 @@ void updateMainMenu() {
       oled.display();
       break;
     case 4:
-      oled.clear(PAGE);
-      oled.setCursor(0,0);
-      oled.print("MAIN MENU");
-      oled.setCursor(0,10);
-      oled.print(" Start run");
-      oled.setCursor(0,20);
-      oled.print(" Settings");
-      oled.setCursor(0,30);
-      oled.print(">MenuItem");
-      oled.display();
-      break;
-    case 5:
       mainMenu = 1;
       oled.clear(PAGE);
       oled.setCursor(0,0);
@@ -247,9 +235,44 @@ void showLogModeScreen() {
 
 void OLED_UpdateSpeed(double speed) {
   // Update OLED speed
-    //oled.clear(PAGE);
-    oled.setCursor(24, 0);
-    oled.print(speed);
-    oled.display();
+  //oled.clear(PAGE);
+  oled.setCursor(24, 0);
+  oled.print(speed);
+  oled.display();
 }
 
+void OLED_UpdateTime(long time) {
+  // Update OLED time
+  int seconds = time / 1000;  // Calculate the full seconds
+  int milliseconds = time % 1000;  // Calculate the remaining milliseconds
+
+  // Clear the previous display to prevent ghosting of text
+  oled.setCursor(18, 30);
+  
+  // Print formatted time as xx.yy where xx is seconds and yy is milliseconds
+  if (milliseconds < 10) {
+    oled.print(seconds);
+    oled.print(".00");
+    oled.print(milliseconds);  // Ensures three digits are always displayed
+  } else if (milliseconds < 100) {
+    oled.print(seconds);
+    oled.print(".0");
+    oled.print(milliseconds);  // Ensures three digits are always displayed
+  } else {
+    oled.print(seconds);
+    oled.print(".");
+    oled.print(milliseconds);
+  }
+
+  // Update the OLED display to show new time
+  oled.display();
+}
+
+void showLogRunScreen() {
+  oled.clear(PAGE);
+  oled.setCursor(0,0);
+  oled.print("Kmh: ");
+  oled.setCursor(0,10);
+  oled.print("Alt: ");
+  oled.display();
+}

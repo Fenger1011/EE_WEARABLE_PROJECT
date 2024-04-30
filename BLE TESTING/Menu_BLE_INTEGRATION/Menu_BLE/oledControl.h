@@ -25,10 +25,16 @@ void updateSettingsMenu();
 // Update speed on screen
 void OLED_UpdateSpeed(double speed);
 
+// Update time on screen
+void OLED_UpdateTime(long time);
+
 // Freerun static screen
 void showFreerunScreen();
 
 // Start run static screen
 void showLogModeScreen();
+
+// Log mode run static screen
+void showLogRunScreen();
 
 #endif /* OLED_CONTROL_H */
