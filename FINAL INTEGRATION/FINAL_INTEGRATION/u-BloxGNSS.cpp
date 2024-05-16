@@ -5,18 +5,22 @@ SFE_UBLOX_GNSS myGNSS;
 double getSpeed(void) {
   double velocity_kmh = myGNSS.getGroundSpeed() * 0.0036; //Get speed in kmh from mm/s
 
-  // Datafiltering: If the speed is below 1kmh, assume no movement ****** SLÅET FRA GRUNDET OLED TESTING ******
-  /*
-  if (velocity_kmh < 1.0) {
+  // Datafiltering: If the speed is below 2kmh, assume no movement
+  if (velocity_kmh < 2.0) {
     velocity_kmh = 0;
   }
-  */ 
 
-  // Debugging
-  Serial.print("Ground Speed kmh: ");
-  Serial.println(velocity_kmh);
+  Serial.print("Speed acquired, ");
 
   return velocity_kmh;
+}
+
+int getAltitude(void) {
+  int altitude_m = myGNSS.getAltitudeMSL() / 1000; //Get altitude in m from mean sea level
+
+  Serial.print("Altitude acquired, ");
+
+  return altitude_m;
 }
 
 void init_GNSS(int setNavFreq) {
@@ -27,6 +31,5 @@ void init_GNSS(int setNavFreq) {
   }
   myGNSS.setI2COutput(COM_TYPE_UBX);                  // Initialize GNSS module for UBX communication
   myGNSS.saveConfigSelective(VAL_CFG_SUBSEC_IOPORT);  // ??
-  myGNSS.setNavigationFrequency(setNavFreq);          // Set navigation frequency 5Hz
+  myGNSS.setNavigationFrequency(setNavFreq);          // Set navigation frequency
 }
-

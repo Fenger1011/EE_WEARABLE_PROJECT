@@ -9,4 +9,7 @@ void init_GNSS(int setNavFreq);
 // Get ground speed
 double getSpeed(void);
 
+// Get altitude
+int getAltitude(void);
+
 #endif /* UBLOX_GNSS_H*/

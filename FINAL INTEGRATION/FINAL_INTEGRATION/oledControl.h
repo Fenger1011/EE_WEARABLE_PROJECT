@@ -25,8 +25,14 @@ void updateSettingsMenu();
 // Update speed on screen
 void OLED_UpdateSpeed(double speed);
 
+// Update altitude on screen
+void OLED_UpdateAltitude(int altitude);
+
 // Update time on screen
 void OLED_UpdateTime(long time);
+
+// Update all parameters for logging run screen (necessary for longer I2C cable bus)
+void OLED_UpdateSpeedAltTime(double speed, int altitude, long time);
 
 // Freerun static screen
 void showFreerunScreen();

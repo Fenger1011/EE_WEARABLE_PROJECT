@@ -8,60 +8,54 @@
 #include "Adafruit_BluefruitLE_UART.h"
 #include "BluefruitConfig.h"
 
+// Constants for Bluefruit BLE module
 #define FACTORYRESET_ENABLE 0
 #define MINIMUM_FIRMWARE_VERSION "0.6.6"
 #define MODE_LED_BEHAVIOUR "HWUART"
 
-// Create bluefruit hardware UART object
+// Create Bluefruit hardware UART object
 Adafruit_BluefruitLE_UART ble(Serial1, BLUEFRUIT_UART_MODE_PIN);  // Serial1 er UART på MCU'en
 
-// A small helper function (HVAD GØR DEN?!!?)
-void error(const __FlashStringHelper* err) {
-  Serial.println(err);
-  while (1)
-    ;
-}
-
 void setup() {
-  Serial1.begin(115200);  // Init UART på SAMD51
-  Serial.begin(115200);   // Init serial
+  // Initialize UART for SAMD51 and Serial monitor
+  Serial1.begin(115200);
+  Serial.begin(115200);
 
+  // Initialize pins for buttons with pull-up resistors
   pinMode(13, INPUT_PULLUP);  // MoveDown button
   pinMode(4, INPUT_PULLUP);  // SelectOption button
+
+  // Attach interrupt handlers for buttons
   attachInterrupt(digitalPinToInterrupt(13), moveDown, FALLING);
   attachInterrupt(digitalPinToInterrupt(4), selectOption, FALLING);
 
-  /* Initialize I2C */
+  // Initialize I2C
   Wire.begin();
+  Wire.setClock(400000);
 
-  /* Start and init oled */
+  // Initialize OLED display
   startOLED();
 
-  /* Initialize GNSS module with navigation frequency 5Hz */
+  // Initialize GNSS module with navigation frequency 5Hz
   init_GNSS(5);
 
-  /* Initialise the module */
+  // Initialize Bluefruit BLE module
   ble.begin(VERBOSE_MODE);
+  ble.echo(false); // Disable command echo
+  ble.setMode(BLUEFRUIT_MODE_DATA); // Set to data mode
 
-  /* Disable command echo from Bluefruit */
-  ble.echo(false);
+  // Setup the timer (Timer 3) with frequency 5Hz
+  setupTimer();
+  TC3->COUNT16.CC[0].reg = 0x5B8D;  // Set timer frequency
+  while (TC3->COUNT16.SYNCBUSY.bit.CC0); // Wait for clock domain sync
+  startTimer();
 
-  /* Set to low */
-  ble.setMode(BLUEFRUIT_MODE_DATA);
-
-  // Setup the timer (Timer 3)
-  setupTimer();                     // Setup the timer
-  TC3->COUNT16.CC[0].reg = 0x5B8D;  // Set timer frequency to 5Hz
-  while (TC3->COUNT16.SYNCBUSY.bit.CC0);            // Wait for clock domain sync
-  startTimer();  // Start the timer
-
-  // Show main menu by default
+  // Display the main menu upon start
   updateMainMenu();
 }
 
 void loop() {
-  // Start timer for LogModeRun loop:
-  unsigned long startTime = millis();
+  unsigned long startTime = millis(); // Start timer for LogModeRun loop:
 
   if (moveDownFlag) {               // User presses down button
     if (currentMenu == 1) {         // Main menu
@@ -107,7 +101,9 @@ void loop() {
         while (!moveDownFlag) {
           if (newSpeedAvailable()) {
             double velocity_kmh = getSpeed();  // Get current speed in kmh
+            int altitude_m = getAltitude();
             OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
+            OLED_UpdateAltitude(altitude_m);   // Update OLED screen with current altitude
           }
         }
       } else if (freeRunMenu == 2) {  // return to main menu
@@ -129,13 +125,16 @@ void loop() {
         while (!moveDownFlag) {
           if (newSpeedAvailable()) {
               double velocity_kmh = getSpeed();  // Get current speed in kmh
+              int altitude_m = getAltitude();    // Get current altitude in meters
               unsigned long currentTime = (millis() - startTime); // Get current time
-              OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
-              OLED_UpdateTime(currentTime);      // Update OLED screen with current time
+              OLED_UpdateSpeedAltTime(velocity_kmh, altitude_m, currentTime);
+              delay(50);
 
               // Send velocity over BT
               ble.print(velocity_kmh);
               ble.print(";");
+
+              Serial.println("Everything updated");
           }
         }
       } else if (startRunMenu == 2) {

@@ -235,10 +235,20 @@ void showLogModeScreen() {
 
 void OLED_UpdateSpeed(double speed) {
   // Update OLED speed
-  //oled.clear(PAGE);
   oled.setCursor(24, 0);
   oled.print(speed);
   oled.display();
+
+  Serial.print("Speed updated on OLED, ");
+}
+
+void OLED_UpdateAltitude(int altitude) {
+  // Update OLED altitude
+  oled.setCursor(24, 10);
+  oled.print(altitude);
+  oled.display();
+
+  Serial.print("Altitude updated on OLED, ");
 }
 
 void OLED_UpdateTime(long time) {
@@ -266,6 +276,44 @@ void OLED_UpdateTime(long time) {
 
   // Update the OLED display to show new time
   oled.display();
+
+  Serial.print("Time updated on OLED, ");
+}
+
+// Update speed, altitude and time all at once
+void OLED_UpdateSpeedAltTime(double speed, int altitude, long time) {
+  int seconds = time / 1000;  // Calculate the full seconds
+  int milliseconds = time % 1000;  // Calculate the remaining milliseconds
+  // Update OLED speed
+  oled.setCursor(24, 0);
+  oled.print(speed);
+
+  // Update OLED altitute
+  oled.setCursor(24, 10);
+  oled.print(altitude);
+
+  // Set cursor for time placement
+  oled.setCursor(18, 30);
+  
+  // Print formatted time as xx.yy where xx is seconds and yy is milliseconds
+  if (milliseconds < 10) {
+    oled.print(seconds);
+    oled.print(".00");
+    oled.print(milliseconds);  // Ensures three digits are always displayed
+  } else if (milliseconds < 100) {
+    oled.print(seconds);
+    oled.print(".0");
+    oled.print(milliseconds);  // Ensures three digits are always displayed
+  } else {
+    oled.print(seconds);
+    oled.print(".");
+    oled.print(milliseconds);
+  }
+
+  // Update the OLED display to show new time
+  oled.display();
+
+  Serial.print("Speed & time updated on OLED, ");
 }
 
 void showLogRunScreen() {
