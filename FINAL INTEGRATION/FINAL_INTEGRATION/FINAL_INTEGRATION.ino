@@ -55,105 +55,100 @@ void setup() {
 }
 
 void loop() {
-  unsigned long startTime = millis(); // Start timer for LogModeRun loop:
+  // Start timer for LogModeRun loop
+  unsigned long startTime = millis();
 
-  if (moveDownFlag) {               // User presses down button
-    if (currentMenu == 1) {         // Main menu
-      mainMenu++;                   // Increment menu variable
-      updateMainMenu();             // Update main menu
-    } else if (currentMenu == 2) {  // FreeRun Menu
-      freeRunMenu++;                // Increment freerunmenu variable
-      updateFreeRunMenu();
-    } else if (currentMenu == 3) {  // Start run menu
-      startRunMenu++;               // Increment startrunmenu variable
-      updateStartRunMenu();
-    } else if (currentMenu == 4) {  // Start run menu
-      settingsMenu++;               // Increment startrunmenu variable
-      updateSettingsMenu();
+  // Handle MoveDown button press
+  if (moveDownFlag) {
+    switch (currentMenu) {
+      case 1:  // Main menu
+        mainMenu++;
+        updateMainMenu();
+        break;
+      case 2:  // FreeRun menu
+        freeRunMenu++;
+        updateFreeRunMenu();
+        break;
+      case 3:  // StartRun menu
+        startRunMenu++;
+        updateStartRunMenu();
+        break;
+      case 4:  // Settings menu
+        settingsMenu++;
+        updateSettingsMenu();
+        break;
     }
-    moveDownFlag = false;  // Reset movedown flag
+    moveDownFlag = false;  // Reset MoveDown flag
   }
 
-  if (selectOptionFlag) {    // User presses select button
-    if (currentMenu == 1) {  // currentMenu = 1 = mainMenu
-      if (mainMenu == 1) {   // mainmenu = 1 = freerun mode
-        currentMenu = 2;     // Current menu is now freerun screen
-        updateFreeRunMenu();
-      } else if (mainMenu == 2) {  // mainmenu = 2 = start run mode
-        currentMenu = 3;           // current menu is now start run screen
-        updateStartRunMenu();
-      } else if (mainMenu == 3) {  // Show settings menu
-        currentMenu = 4;           // Current menu is now settings screen
-        updateSettingsMenu();
-      } else if (mainMenu == 4) {  // Show menuItem menu
-        currentMenu = 5;           // Current menu is now menuItem screen
-      }
-    }
-
-    
-    /*FREERUN MENU & FREERUN CODE*/
-    else if (currentMenu == 2) {  // currentMenu = 2 = freeRunMenu
-      if (freeRunMenu == 1) {
-        // Show freerun screen
-        showFreerunScreen();
-
-        // Run get ground speed code
-        while (!moveDownFlag) {
-          if (newSpeedAvailable()) {
-            double velocity_kmh = getSpeed();  // Get current speed in kmh
-            int altitude_m = getAltitude();
-            OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
-            OLED_UpdateAltitude(altitude_m);   // Update OLED screen with current altitude
-          }
+  // Handle SelectOption button press
+  if (selectOptionFlag) {
+    switch (currentMenu) {
+      case 1:  // Main menu
+        if (mainMenu == 1) {  // FreeRun mode
+          currentMenu = 2;
+          updateFreeRunMenu();
+        } else if (mainMenu == 2) {  // StartRun mode
+          currentMenu = 3;
+          updateStartRunMenu();
+        } else if (mainMenu == 3) {  // Settings menu
+          currentMenu = 4;
+          updateSettingsMenu();
+        } else if (mainMenu == 4) { 
+          currentMenu = 5;
         }
-      } else if (freeRunMenu == 2) {  // return to main menu
-        currentMenu = 1;
-        freeRunMenu = 1;
-        updateMainMenu();  // Return to main menu
-      }
-    }
-    
-    
-    /*START RUN CODE & START RUN CODE*/
-    else if (currentMenu == 3) {  // currentMenu = 3 = start run menu
-      if (startRunMenu == 1) {
-        
-        // Show run screen
-        showLogRunScreen();
+        break;
 
-        // Run start run code
-        while (!moveDownFlag) {
-          if (newSpeedAvailable()) {
-              double velocity_kmh = getSpeed();  // Get current speed in kmh
-              int altitude_m = getAltitude();    // Get current altitude in meters
-              unsigned long currentTime = (millis() - startTime); // Get current time
-              OLED_UpdateSpeedAltTime(velocity_kmh, altitude_m, currentTime);
-              delay(50);
+      case 2:  // FreeRun menu, no Bluetooth traffic
+        if (freeRunMenu == 1) {
+          showFreerunScreen();
+          while (!moveDownFlag) {
+            if (newSpeedAvailable()) {
+              double velocity_kmh = getSpeed();  // Get current speed in km/h
+              int altitude = getAltitude();      // Get current altitude in m
+              OLED_UpdateSpeed(velocity_kmh);    // Update OLED screen with current velocity
+              OLED_UpdateAltitude(altitude);
+            }
+          }
+        } else if (freeRunMenu == 2) {  // Return to main menu
+          currentMenu = 1;
+          freeRunMenu = 1;
+          updateMainMenu();
+        }
+        break;
 
-              // Send velocity over BT
+      case 3:  // StartRun menu, Bluetooth traffic
+        if (startRunMenu == 1) {
+          showLogRunScreen();
+          while (!moveDownFlag) {
+            if (newSpeedAvailable()) {
+              double velocity_kmh = getSpeed();  // Get current speed in km/h
+              unsigned long currentTime = millis() - startTime;  // Get current time
+              int altitude = getAltitude(); // Get current altitutde in m
+              OLED_UpdateSpeedAltTime(velocity_kmh, altitude, currentTime); // Update all parameters to minimize I2C bus traffic
+
+              // Send velocity over Bluetooth
               ble.print(velocity_kmh);
               ble.print(";");
-
-              Serial.println("Everything updated");
+            }
           }
+        } else if (startRunMenu == 2) {  // Return to main menu
+          currentMenu = 1;
+          startRunMenu = 1;
+          updateMainMenu();
         }
-      } else if (startRunMenu == 2) {
-        currentMenu = 1;
-        startRunMenu = 1;
-        updateMainMenu();  // Return to main menu
-      }
-    }
+        break;
 
-    else if (currentMenu == 4) {  // currentMenu = 4 = settings menu
-      if (settingsMenu == 1) {
-        /*WHILE: SETTINGS-MENU CODE */
-      } else if (settingsMenu == 3) {
-        currentMenu = 1;
-        settingsMenu = 1;
-        updateMainMenu();  // Return to main menu
-      }
+      case 4:  // Settings menu
+        if (settingsMenu == 1) {
+          // Add settings menu code here
+        } else if (settingsMenu == 3) {  // Return to main menu
+          currentMenu = 1;
+          settingsMenu = 1;
+          updateMainMenu();
+        }
+        break;
     }
-
-    selectOptionFlag = false;  // Reset select flag
+    selectOptionFlag = false;  // Reset SelectOption flag
   }
 }
